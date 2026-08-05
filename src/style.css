@@ -1,0 +1,219 @@
+/* ------------------------------------------------------------------
+   component-011 — infinite stepped image stack.
+   Images are absolutely centered; GSAP owns every transform
+   (slot offset + rotation). An editorial frame overlays the scene:
+   brand top, project meta left, description right, credits bottom.
+   ------------------------------------------------------------------ */
+
+:root {
+  --paper: #121110;
+  --ink: #f2efe9;
+  --muted: #8b867d;
+  --body: #b3ada3;
+  --frame-pad: clamp(1.5rem, 3vw, 2.75rem);
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.scene {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------
+   Image stack
+   --------------------------------------------------------------- */
+
+.stack-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(48rem, 62vw);
+  aspect-ratio: 3 / 1.7;
+  object-fit: cover;
+  border-radius: 1rem;
+  opacity: 0; /* revealed by GSAP once positioned */
+  box-shadow:
+    0 2.5rem 5rem -1.5rem rgba(0, 0, 0, 0.85),
+    0 0.75rem 1.5rem rgba(0, 0, 0, 0.4);
+  will-change: transform;
+  transition: filter 0.35s ease;
+}
+
+.stack-image.is-active {
+  cursor: pointer;
+}
+
+.stack-image.is-active:hover {
+  filter: brightness(0.94);
+}
+
+/* ---------------------------------------------------------------
+   Editorial frame
+   --------------------------------------------------------------- */
+
+.frame {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--frame-pad);
+}
+
+.frame-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.brand {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.brand sup {
+  font-size: 0.6em;
+}
+
+/* ----- left: project meta ----- */
+
+.side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.side--left {
+  left: var(--frame-pad);
+  width: clamp(11rem, 16vw, 17rem);
+  gap: 1.1rem;
+}
+
+.mask {
+  display: block;
+  overflow: hidden;
+}
+
+.swap {
+  display: inline-block;
+  will-change: transform;
+}
+
+.project-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  /* always a single line — the mask may grow past the column width */
+  white-space: nowrap;
+  width: max-content;
+  max-width: none;
+  /* clickable: opens the active project */
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.project-title:hover .swap {
+  font-style: italic;
+}
+
+.project-cat .swap {
+  color: var(--muted);
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.counter-current .swap {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.counter-line {
+  width: 2.5rem;
+  height: 1px;
+  background: rgba(242, 239, 233, 0.25);
+}
+
+.counter-total {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* ----- right: description + scroll hint ----- */
+
+.side--right {
+  right: var(--frame-pad);
+  width: clamp(12rem, 16vw, 17rem);
+  gap: 2.25rem;
+}
+
+.project-desc {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--body);
+}
+
+/* ---------------------------------------------------------------
+   Small screens — keep the frame, drop the side columns
+   --------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .side {
+    display: none;
+  }
+
+  .stack-image {
+    width: 80vw;
+  }
+}
