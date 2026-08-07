@@ -26,10 +26,10 @@ const images = [...document.querySelectorAll(".stack-image")];
 const COUNT = images.length;
 const CENTER_INDEX = 2; // 3rd image starts centered
 
-const GAP = 40; // px between stacked images
-const STEP_DURATION = 1.5;
+const GAP = 30; // px between stacked images
+const STEP_DURATION = 2.5;
 const EASE = "elastic.out(1, 0.75)";
-const GESTURE_GAP = 130; // ms of wheel silence separating two gestures
+const GESTURE_GAP = 100; // ms of wheel silence separating two gestures
 const MIN_STEP_INTERVAL = 140; // hard floor between steps
 
 let stepSize = 0;

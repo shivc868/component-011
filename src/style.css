@@ -52,7 +52,7 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(48rem, 62vw);
+  width: min(38rem, 50vw);
   aspect-ratio: 3 / 1.7;
   object-fit: cover;
   border-radius: 1rem;
@@ -214,6 +214,6 @@ body {
   }
 
   .stack-image {
-    width: 80vw;
+    width: 70vw;
   }
 }
