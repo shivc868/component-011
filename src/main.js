@@ -1,42 +1,19 @@
 import "./style.css";
 import { gsap } from "gsap";
 
-/*
- * component-011 — infinite stepped image stack.
- *
- * A continuous position (state.pos, in slot units) is tweened toward
- * an integer target. Every image derives its transform from its
- * wrapped offset to that position each frame:
- *   y        = offset * stepSize
- *   rotation = -8 * cos(π * offset)  → -8° at even slots, +8° at odd,
- *              smoothly blending while an image travels between slots
- *   z-index  = closer to center → higher (center always on top)
- *
- * Scroll feel: one *gesture* = one step, but a new gesture retargets
- * the tween instantly — rapid flicks chain through images without
- * waiting for the previous settle. A gesture boundary is detected by
- * a gap of wheel-silence, so trackpad inertia never double-fires,
- * yet deliberate fast flicking stays fully responsive.
- *
- * The editorial frame (left title/category/counter, right description)
- * swaps its text through overflow masks on every step.
- */
-
 const images = [...document.querySelectorAll(".stack-image")];
 const COUNT = images.length;
-const CENTER_INDEX = 2; // 3rd image starts centered
+const CENTER_INDEX = 2;
 
-const GAP = 30; // px between stacked images
+const GAP = 30;
 const STEP_DURATION = 2.5;
 const EASE = "elastic.out(1, 0.75)";
-const GESTURE_GAP = 100; // ms of wheel silence separating two gestures
-const MIN_STEP_INTERVAL = 140; // hard floor between steps
+const GESTURE_GAP = 100;
+const MIN_STEP_INTERVAL = 140;
 
 let stepSize = 0;
 const state = { pos: 0 };
 let target = 0;
-
-/* ----- project meta, aligned with image DOM order ----- */
 
 const PROJECTS = [
   {
@@ -86,16 +63,6 @@ function setMetaText(i) {
   descEl.textContent = p.desc;
 }
 
-/*
- * The meta text is NOT animated on its own timeline — it derives its
- * position from the same continuous state.pos as the images, like a
- * ticker tape behind the mask:
- *   d = pos - nearest slot  ∈ [-0.5, 0.5)
- *   yPercent = -d * 230  →  0 at rest, ±115 (fully hidden) at the
- *   halfway point, where the text swaps to the next project.
- * Identical speed, direction, and elastic settle as the photography —
- * however fast the user chains flicks, type and images stay one motion.
- */
 const maskedEls = [titleEl, categoryEl, numEl];
 let displayedSlot = 0;
 
@@ -115,13 +82,10 @@ function renderMeta() {
   });
 }
 
-/* ----- stack geometry ----- */
-
 function measure() {
   stepSize = images[0].offsetHeight + GAP;
 }
 
-/* wrap an offset into (-COUNT/2, COUNT/2] so the ring is endless */
 function wrapOffset(x) {
   let w = ((x % COUNT) + COUNT) % COUNT;
   if (w > COUNT / 2) w -= COUNT;
@@ -164,22 +128,9 @@ function step(dir) {
   goTo(target + dir);
 }
 
-/* ----- input ----- */
-
-/*
- * Trackpad inertia keeps firing events for over a second after a
- * flick, so wheel-silence alone can't separate gestures — a second
- * deliberate flick would drown in the tail. But inertia deltas only
- * ever decay; a sudden RISE in magnitude mid-stream can only be a
- * fresh human flick. So a new gesture is any of:
- *   1. wheel silence longer than GESTURE_GAP (mouse notches, pauses)
- *   2. a delta spike over the decaying inertia envelope (re-flick)
- *   3. a direction flip
- */
-
-const RETRIGGER_RATIO = 1.4; // delta must jump 40% over the envelope
-const RETRIGGER_MIN_DELTA = 50; // and be a real flick, not jitter
-const RETRIGGER_COOLDOWN = 250; // ms; ignore the ramp-up of the same flick
+const RETRIGGER_RATIO = 1.4;
+const RETRIGGER_MIN_DELTA = 50;
+const RETRIGGER_COOLDOWN = 250;
 
 let lastWheelTime = 0;
 let lastAbsDelta = 0;
@@ -193,9 +144,9 @@ window.addEventListener(
     const abs = Math.abs(e.deltaY);
     const dir = e.deltaY > 0 ? 1 : -1;
     const gap = now - lastWheelTime;
-    lastWheelTime = now; // inertia tails keep refreshing this
+    lastWheelTime = now;
 
-    if (abs < 4) return; // micro-jitter: not even worth tracking
+    if (abs < 4) return;
 
     const isNewGesture =
       gap > GESTURE_GAP ||
@@ -236,9 +187,6 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") step(-1);
 });
 
-/* click: active image (or the title) opens the project;
-   clicking a peeking neighbour steps to it instead */
-
 images.forEach((el, i) => {
   el.addEventListener("click", () => {
     const off = wrapOffset(i - CENTER_INDEX - state.pos);
@@ -258,8 +206,6 @@ window.addEventListener("resize", () => {
   measure();
   render();
 });
-
-/* ----- init ----- */
 
 measure();
 setMetaText(projectAt(0));
